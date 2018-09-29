@@ -1,0 +1,61 @@
+
+    <view class="container">
+        <form bindsubmit="formSubmit">
+            <view class="mainUpload">
+                <textarea class="userText" placeholder="添加内容..." name="content"/>
+                <view class="uploadImgs">
+                    <view class="weui-uploader__bd">
+                        <view class="weui-uploader__files">
+                            <block wx:for="{{imageList}}" wx:for-index="index" wx:for-item="image" wx:key="key">
+                                <view class="weui-uploader__file">
+                                    <image class="weui-uploader__img" src="{{image}}" data-src="{{image}}" bindtap="previewImage"/>
+                                </view>
+                            </block>
+                        </view>
+                        <view class="weui-uploader__input-box">
+                            <view class="weui-uploader__input" bindtap="chooseImage"/>
+                        </view>
+                    </view>
+                    <view class="tip"><span>最多可上传9张图片</span></view>
+                </view>
+                <view class="navigator location" bindtap="chooseLocation">
+                    <view class="locationSign">
+                        <image src="./images/location.png"/>
+                        <span>所在位置：</span>
+                    </view>
+                    <view class="item-content">{{address}}</view>
+                    <view class="navigator-arrow"/>
+                </view>
+                <view class="navigator location">
+                    <view class="locationSign">
+                        <image src="./images/location.png"/>
+                        <span>日期：</span>
+                    </view>
+                    <picker class="item-content" mode="date" value="{{date}}" bindchange="bindDateChange">
+                        <view class="weui-input">{{date}}</view>
+                    </picker>
+                    <view class="navigator-arrow"/>
+                </view>
+                <view class="navigator location">
+                    <view class="locationSign">
+                        <image src="./images/location.png"/>
+                        <span>时间：</span>
+                    </view>
+                    <picker class="item-content" mode="time" value="{{time}}" bindchange="bindTimeChange">
+                        <view class="weui-input">{{time}}</view>
+                    </picker>
+                    <view class="navigator-arrow"/>
+                </view>
+                <view class="navigator location">
+                    <view class="locationSign">
+                        <image src="./images/location.png"/>
+                        <span>天气：</span>
+                    </view>
+                    <view class="item-content">{{weather.cond.txt}} {{weather.tmp}}°</view>
+                </view>
+            </view>
+            <view class="btn-area">
+                <button type="primary" formType="submit">提交</button>
+            </view>
+        </form>
+    </view>

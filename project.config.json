@@ -1,0 +1,16 @@
+{
+	"description": "你的个人生活管家",
+	"setting": {
+		"urlCheck": false,
+		"es6": false,
+		"postcss": false,
+		"minified": false,
+		"newFeature": true
+	},
+	"compileType": "miniprogram",
+	"appid": "wxf6c91f679a67b89c",
+	"projectname": "housekeeper",
+	"miniprogramRoot": "dist/",
+	"condition": {},
+	"cloudfunctionRoot": "./cloud-functions"
+}

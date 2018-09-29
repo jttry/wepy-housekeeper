@@ -1,0 +1,188 @@
+<style lang="less">
+.container {
+  background-color: #F2f2f2;
+  min-height: 100%;
+}
+
+.goods-container{
+  display: flex;
+  justify-content: space-between;  
+  flex-wrap:wrap;
+  box-sizing: content-box;
+  padding: 24rpx;
+}
+.goods-box{
+  width: 339rpx;
+  height: 522rpx;
+  background-color: #fff;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+}
+.goods-box .img-box{
+  width: 339rpx;
+  height: 339rpx;
+  overflow: hidden;
+}
+.goods-box .img-box image{
+   width: 339rpx;
+   height: 339rpx;
+}
+.goods-box .goods-title{
+  width: 280rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 24rpx;
+  padding: 24rpx 0 0rpx 0;
+  color:#000;
+  margin-left: 24rpx;
+}
+.goods-box .goods-price{
+    width: 280rpx;
+    overflow:hidden;
+    font-size:24rpx;
+    padding:24rpx 0;
+    margin:12rpx 0 12rpx 24rpx;
+    color:#aaa;
+    height:12rpx;
+}
+.goods-box .address{
+  width: 100%;
+  font-size: 24rpx;
+  margin-left: 24rpx;
+  color :#aaa;
+}
+.no-more-goods{
+  text-align: center;
+  font-size: 24rpx;
+  padding-bottom:48rpx; 
+  color: #999;
+}
+
+</style>
+
+<template>
+    <view class="container">
+        <view class="goods-container">
+            <repeat for="{{diary}}" key="index" @tap="toDetailsTap" data-id="{{item.id}}">
+                <view class="goods-box">
+                    <view class="img-box">
+                        <image src="{{item.imgs[0]}}" class="image" mode="aspectFill" lazy-load="true"/>
+                    </view>
+                    <view class="goods-title">{{item.content}}</view>
+                    <view style='display:flex;'>
+                        <view class="goods-price">{{item.address}}</view>
+                        <view class="goods-price">{{item.weather}}  {{item.tmp}}°</view>
+                    </view> 
+                    <view class="address">{{item.date}}</view>
+                </view>
+            </repeat>
+        </view>
+        <view hidden="{{loadingMoreHidden ? true : false}}" class="no-more-goods">没有更多啦</view>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy';
+    import moment from 'moment';
+
+
+    export default class Diary extends wepy.page {
+
+        curPage = 1;
+        pageSize = 10;
+
+        config = {
+            navigationBarTitleText: '日记本'
+        };
+
+        // 可用于页面模板绑定的数据
+        data = {
+            loadingMoreHidden: true,
+            diary: []
+        };
+
+        computed = {
+            diaryList() {
+                return this.diary.map(item => {
+                    item.date = moment(item.date).format('YYYY-MM-DD HH:mm:ss');
+                    return item;
+                })
+            }
+        };
+
+        // 事件处理函数(集中保存在methods对象中)
+        methods = {
+            toDetailsTap(e) {
+                wx.navigateTo({
+                    url: "/pages/goods-details/index?id=" + e.currentTarget.dataset.id
+                });
+            }
+        };
+
+        onLoad() {
+            this.getDiaryList();
+        }
+
+        onReachBottom() {
+            this.curPage += 1;
+            this.getDiaryList(true);
+        }
+
+        onPullDownRefresh() {
+            this.curPage = 1;
+            this.getDiaryList();
+        }
+
+        onShareAppMessage() {
+            return {
+                title: wx.getStorageSync('mallName') + '——' + app.globalData.shareProfile,
+                path: '/pages/index/index',
+                success: function (res) {
+                    // 转发成功
+                },
+                fail: function (res) {
+                    // 转发失败
+                }
+            }
+        }
+
+        getDiaryList(append) {
+            const userInfo = this.$parent.globalData.userInfo;
+            wx.showLoading({mask: true});
+            wx.cloud.callFunction({
+                name: 'getDiaryList',
+                data: {
+                    userid: userInfo && userInfo.nickName,
+                    page: this.curPage,
+                    pageSize: this.pageSize  
+                }
+            })
+            .then(res => {
+                wx.hideLoading(); 
+                const data = res.result.data;
+                if (data.code === 404 || data.code === 700) {
+                    this.loadingMoreHidden = false;
+                    if (!append) {
+                        this.diary = [];
+                    }
+                }
+                else {
+                    let diary = [];
+                    if (append) {
+                        diary = this.diary;
+                    }        
+                    for(var i = 0; i < data.length; i++){
+                        diary.push(data[i]);
+                    }
+                    this.loadingMoreHidden = true;
+                    this.diary = diary;
+                }
+                this.$apply();
+            });
+        }
+
+    }
+</script>
+
+

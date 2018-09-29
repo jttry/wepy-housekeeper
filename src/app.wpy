@@ -1,0 +1,91 @@
+<style lang="less">
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+</style>
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function'
+
+import { setStore } from 'wepy-redux'
+import configStore from './store'
+
+const store = configStore()
+setStore(store)
+
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/index',
+      'pages/add',
+      'pages/diary',
+      'pages/payment',
+      'pages/camera',
+      'pages/index-bak'
+    ],
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#fff',
+      navigationBarTitleText: 'WeChat',
+      navigationBarTextStyle: 'black'
+    },
+    tabBar: {
+      "color": "#6e6d6b",
+      "selectedColor": "#e64340",
+      "borderStyle": "white",
+      "backgroundColor": "#fff",
+      "box-shadow":"0 0 6px 0",
+      "list": [{
+      "pagePath": "pages/index",
+        "iconPath": "images/nav/home-off.png",
+        "selectedIconPath": "images/nav/home-on.png",
+        "text": "首页"
+      }, {
+        "pagePath": "pages/add",
+        "iconPath": "images/nav/add-off.png",
+        "selectedIconPath": "images/nav/add-on.png",
+        "text": "新增"
+      },
+      {
+        "pagePath": "pages/index",
+        "iconPath": "images/nav/my-off.png",
+        "selectedIconPath": "images/nav/my-on.png",
+        "text": "我的"
+      }]
+    }
+  }
+
+  globalData = {
+    userInfo: null,
+    apiHost: "https://www.easy-mock.com/mock/5ba456cf1c36477dbaa3cccb",
+    version: "1.0.0",
+    shareProfile: '你的个人生活管家'
+  }
+
+  constructor () {
+    super()
+    this.use('promisify')
+  }
+
+  onLaunch() {
+    this.getUserInfo();
+  }
+
+  async getUserInfo(cb) {
+    if (this.globalData.userInfo) {
+      return this.globalData.userInfo;
+    }
+    const login = await wepy.login();
+    const res = await wepy.getUserInfo();
+    const userInfo = {...login, ...res.userInfo};
+    this.globalData.userInfo = userInfo;
+    cb && cb(userInfo);
+  }
+}
+</script>

@@ -1,0 +1,19 @@
+
+    <view class="container">
+        <view class="goods-container">
+            <block bindtap="toDetailsTap" data-id="{{item.id}}" wx:for="{{diary}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+                <view class="goods-box">
+                    <view class="img-box">
+                        <image src="{{item.imgs[0]}}" class="image" mode="aspectFill" lazy-load="true"/>
+                    </view>
+                    <view class="goods-title">{{item.content}}</view>
+                    <view style="display:flex;">
+                        <view class="goods-price">{{item.address}}</view>
+                        <view class="goods-price">{{item.weather}}  {{item.tmp}}°</view>
+                    </view> 
+                    <view class="address">{{item.date}}</view>
+                </view>
+            </block>
+        </view>
+        <view hidden="{{loadingMoreHidden ? true : false}}" class="no-more-goods">没有更多啦</view>
+    </view>

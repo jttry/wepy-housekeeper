@@ -1,0 +1,290 @@
+<style lang="less">
+@import "../common/weui.wxss";
+
+.container {
+    background-color: #F2f2f2;
+    min-height: 100%;
+}
+
+form {
+    width: 100%;
+}
+
+/**拍照上传**/
+.navDiv{position:relative;width: 100%;height: 40px;background-color: #F2F2F2;font-family: "Microsoft Yahei","SimSun",Arial;font-size: 16px;line-height: 40px;}
+.mainUpload{width: 90%;height: 91%;margin:0 0 0 20px;font-family: "Microsoft Yahei","SimSun",Arial;font-size: 13px;}
+.userText{width: 100%;height: 300rpx;border: 0;font-size: 16px;margin-top:10px;}
+.tip {position: relative;color:#949494; height: 100rpx;line-height: 100rpx;bottom: 2px;}
+
+.location{width: 100%;}
+.locationSign{position: relative; width: 350rpx;}
+.locationSign image{position: relative;width: 25px;height: 25px;vertical-align: middle;}
+.locationSign span{margin-left: 18px;vertical-align: middle;}
+.item-content{width: 100%;height: 27px;font-size: 11px;line-height: 27px;}
+
+
+.navigator-box {
+  opacity: 0;
+  position: relative;
+  background-color: #FFFFFF;
+  line-height: 1.41176471;
+  font-size: 34rpx;
+
+  transform: translateY(-50%);
+  transition: .3s;
+}
+.navigator-box-show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.navigator {
+  padding: 30rpx 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.navigator:before {
+  content: " ";
+  position: absolute;
+  left: 30rpx;
+  top: 0;
+  right: 30rpx;
+  height: 1px;
+  border-top: 1rpx solid #D8D8D8;
+  color: #D8D8D8;
+}
+.navigator:first-child:before {
+  display: none;
+}
+.navigator-text {
+  flex: 1;
+}
+.navigator-arrow {
+  padding-right: 26rpx;
+  position: relative;
+}
+.navigator-arrow:after {
+  content: " ";
+  display: inline-block;
+  height: 18rpx;
+  width: 18rpx;
+  border-width: 2rpx 2rpx 0 0;
+  border-color: #888888;
+  border-style: solid;
+  transform: matrix(0.71, 0.71, -0.71, 0.71, 0, 0);
+  position: absolute;
+  top: 50%;
+  margin-top: -8rpx;
+  right: 28rpx;
+}
+
+.btn-area {
+    width: 90%;
+    margin:auto;
+}
+
+</style>
+
+<template>
+    <view class="container">
+        <form @submit="formSubmit">
+            <view class="mainUpload">
+                <textarea class="userText" placeholder="添加内容..." name="content"></textarea>
+                <view class="uploadImgs">
+                    <view class="weui-uploader__bd">
+                        <view class="weui-uploader__files">
+                            <repeat for="{{imageList}}" item="image">
+                                <view class="weui-uploader__file">
+                                    <image class="weui-uploader__img" src="{{image}}" data-src="{{image}}" @tap="previewImage" />
+                                </view>
+                            </repeat>
+                        </view>
+                        <view class="weui-uploader__input-box">
+                            <view class="weui-uploader__input" @tap="chooseImage"></view>
+                        </view>
+                    </view>
+                    <view class="tip"><span>最多可上传9张图片</span></view>
+                </view>
+                <view class="navigator location" @tap="chooseLocation">
+                    <view class="locationSign">
+                        <image src="./images/location.png" />
+                        <span>所在位置：</span>
+                    </view>
+                    <view class="item-content">{{address}}</view>
+                    <view class="navigator-arrow"></view>
+                </view>
+                <view class="navigator location">
+                    <view class="locationSign">
+                        <image src="./images/location.png" />
+                        <span>日期：</span>
+                    </view>
+                    <picker class="item-content" mode="date" value="{{date}}" @change="bindDateChange">
+                        <view class="weui-input">{{date}}</view>
+                    </picker>
+                    <view class="navigator-arrow"></view>
+                </view>
+                <view class="navigator location">
+                    <view class="locationSign">
+                        <image src="./images/location.png" />
+                        <span>时间：</span>
+                    </view>
+                    <picker class="item-content" mode="time" value="{{time}}" @change="bindTimeChange">
+                        <view class="weui-input">{{time}}</view>
+                    </picker>
+                    <view class="navigator-arrow"></view>
+                </view>
+                <view class="navigator location">
+                    <view class="locationSign">
+                        <image src="./images/location.png" />
+                        <span>天气：</span>
+                    </view>
+                    <view class="item-content">{{weather.cond.txt}} {{weather.tmp}}°</view>
+                </view>
+            </view>
+            <view class="btn-area">
+                <button type="primary" formType="submit">提交</button>
+            </view>
+        </form>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy';
+    import {connect} from 'wepy-redux';
+    import moment from 'moment';
+    import u from 'underscore';
+
+    // redux
+    @connect({
+        weather(state) {
+            return state.weather.weather;
+        }
+    })
+
+    export default class Add extends wepy.page {
+
+        db = null;
+
+        config = {
+            navigationBarTitleText: '写日记'
+        };
+
+        // 可用于页面模板绑定的数据
+        data = {
+            imageList: [],
+            address: '',
+            longitude: 0,
+            latitude: 0,
+            date: '',
+            time: ''
+        };
+
+        // 事件处理函数(集中保存在methods对象中)
+        methods = {
+            async chooseImage() {
+                const res = await wepy.chooseImage({
+                    sourceType: ['camera', 'album'],
+                    sizeType: ['compressed', 'original'],
+                    count: 9
+                });
+                console.log(res);
+                this.imageList = res.tempFilePaths;
+                // this.imageList = [].concat(this.imageList, res.tempFilePaths).splice(0, 9);
+                this.$apply();
+            },
+
+            previewImage(e) {
+                const current = e.target.dataset.src;
+                wx.previewImage({
+                    current,
+                    urls: this.imageList
+                });
+            },
+
+            async chooseLocation() {
+                const res = await wepy.chooseLocation();
+                this.address = res.address;
+                this.longitude = res.longitude;
+                this.latitude = res.latitude;
+                this.$apply();
+            },
+
+            bindDateChange(e) {
+                this.date = e.detail.value;
+                this.$apply();
+            },
+
+            bindTimeChange(e) {
+                this.time = e.detail.value;
+                this.$apply();
+            },
+
+            formSubmit(e) {
+                const userInfo = this.$parent.globalData.userInfo;
+                const requsets = this.imageList.map(tempFilePath => wepy.saveFile({tempFilePath}));
+                Promise.all(requsets).then(res => {
+                    const imgs = u.pluck(res, 'savedFilePath');
+                    const data = {
+                        userid: userInfo && userInfo.nickName,
+                        content: e.detail.value.content,
+                        date: +new Date(this.date + ' ' + this.time),
+                        longitude: this.longitude,
+                        latitude: this.latitude,
+                        address: this.address,
+                        weather: this.weather.cond.txt,
+                        tmp: this.weather.tmp,
+                        imgs
+                    };
+                    wx.cloud.callFunction({
+                        name: 'addDiary',
+                        data
+                    }).then(() => this.resetFormData());
+                });
+            }
+        };
+
+        onLoad() {
+            this.updateTime();
+        }
+
+        onShow() {
+            this.updateTime();
+        }
+
+        updateTime() {
+            const dateTime = moment();
+            this.date = dateTime.format('YYYY-MM-DD');
+            this.time = dateTime.format('HH:mm:ss');
+            this.$apply();
+        }
+
+        onPageScroll(e) {
+            // this.scrollTop = e.scrollTop;
+        }
+
+        onShareAppMessage() {
+            return {
+                title: wx.getStorageSync('mallName') + '——' + app.globalData.shareProfile,
+                path: '/pages/index/index',
+                success: function (res) {
+                    // 转发成功
+                },
+                fail: function (res) {
+                    // 转发失败
+                }
+            }
+        }
+
+        resetFormData() {
+            this.imageList = [];
+            this.address = '';
+            this.longitude = 0;
+            this.latitude = 0;
+            this.$apply();
+        }
+
+    }
+</script>
+
+

@@ -1,0 +1,131 @@
+     
+<style lang="less">
+@import "../common/weui.wxss";
+
+camera {
+  height: 500rpx;
+}
+
+.preview-tips {
+  margin: 20rpx 0;  
+}
+
+.photo, .video {
+  margin-top: 50rpx;
+  width: 100%;
+}
+
+.btn-area {
+    width: 100%;
+    margin-top: 0;
+}
+
+.first-btn {
+  margin-top: 30rpx;
+}
+
+form {
+  margin-top: 30rpx;
+}
+
+.weui-cell__bd {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20rpx 0;
+  min-height: 60rpx;
+}
+
+</style>
+
+<template>
+    <view class="container">
+        <camera
+            flash="off"
+            device-position="{{position}}"
+            @error="error"
+        >
+        </camera>
+        <view class="btn-area first-btn">
+            <button type="primary" @tap="togglePosition">切换摄像头</button>
+        </view>
+        <view class="btn-area">
+            <button type="primary" @tap="takePhoto">拍照</button>
+        </view>
+        <view class="btn-area">
+            <button type="primary" @tap="startRecord">开始录像</button>
+        </view>
+        <view class="btn-area">
+            <button type="primary" @tap="stopRecord">结束录像</button>
+        </view>
+        <navigator url="./payment">支付</navigator>
+        <view class="preview-tips">预览</view>
+        <image wx:if="{{src}}" mode="widthFix" class="photo" src="{{src}}"></image>
+        <video wx:if="{{videoSrc}}" class="video" src="{{videoSrc}}"></video>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy';
+
+    export default class Camera extends wepy.page {
+
+        config = {
+            navigationBarTitleText: '直播'
+        };
+
+        // 可用于页面模板绑定的数据
+        data = {
+            src: '',
+            videoSrc: '',
+            position: 'front',
+            mode: 'scanCode',
+            result: {}
+        };
+
+        // 事件处理函数(集中保存在methods对象中)
+        methods = {
+            takePhoto() {
+                this.ctx.takePhoto({
+                    quality: 'high',
+                    success: (res) => {
+                        this.src = res.tempImagePath;
+                        this.$apply();
+                    }
+                });
+            },
+            startRecord() {
+                this.ctx.startRecord();
+            },
+            stopRecord() {
+                this.ctx.stopRecord({
+                    success: (res) => {
+                        this.src = res.tempThumbPath;
+                        this.videoSrc = res.tempVideoPath;
+                        this.$apply();
+                    }
+                });
+            },
+            togglePosition() {
+                this.position === 'front' ? 'back' : 'front';
+                this.$apply();
+
+            }
+        };
+
+        onLoad() {
+            this.ctx = wx.createCameraContext();
+        }
+
+        error(e) {
+            console.log(e.detail)
+        }
+
+
+
+    }
+
+
+</script>
+  
+     

@@ -1,0 +1,46 @@
+
+    <view class="container">
+        <view class="view-container swiper-container">
+            <swiper class="swiper_box" autoplay="{{autoplay}}" interval="{{interval}}" duration="{{duration}}" bindchange="swiperchange">
+                <block wx:for="{{banners}}" wx:for-index="index" wx:for-item="item" wx:key="fileID">
+                    <swiper-item>
+                        <image src="{{item.tempFileURL}}" class="slide-image" width="750rpx" height="400rpx"/>
+                    </swiper-item>
+                </block>
+            </swiper>
+            <view class="dots">  
+                <block wx:for="{{banners}}" wx:for-index="index" wx:for-item="item" wx:key="fileID">  
+                    <view class="dot{{index == swiperCurrent ? ' active' : ''}}"/>  
+                </block>  
+            </view>  
+        </view>
+        <view class="view-container">
+            <text class="title">重要的事</text>
+            <view class="important-container">
+                <view class="important-info">
+                    <text class="run-data">今日运动总步数： {{lastDayStep}}</text>
+                </view>
+                <view class="weather">
+                    <view class="city">{{city}}  {{district}}</view>
+                    <view class="street">{{street}}</view>
+                    <view class="tmp">{{weather.tmp}}°</view>
+                    <view class="type">{{weather.cond.txt}} | 空气 {{weatherQuality.city.qlty}}</view>
+                </view>         
+            </view>
+        </view>
+        <view class="view-container">
+            <text class="title">我的工具</text>
+            <scroll-view scroll-x> 
+                <view class="tool-container">
+                    <block wx:for="{{tools}}" wx:for-index="index" wx:for-item="item" wx:key="key">
+                        <navigator class="tool" url="{{item.link}}">
+                            <view>
+                                <image src="{{item.img}}"/>
+                                <view class="text">{{item.text}}</view>
+                            </view>
+                        </navigator>
+                    </block> 
+                </view>
+            </scroll-view> 
+        </view>
+    </view>
